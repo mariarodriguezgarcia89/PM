@@ -1,0 +1,211 @@
+package com.example.rompehuevos // Declara el paquete de la aplicación
+
+// Importa las clases y componentes necesarios de Android y Jetpack Compose
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.rompehuevos.ui.theme.RompehuevosTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.saveable.rememberSaveable
+
+// Define la actividad principal que hereda de ComponentActivity
+class MainActivity : ComponentActivity() {
+
+    // Método que se ejecuta cuando la actividad es creada
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        // Llama al método onCreate de la clase padre
+        super.onCreate(savedInstanceState)
+
+        // Habilita el modo edge-to-edge: la app usa toda la pantalla
+        // Ignora las áreas del system bar (status bar y navigation bar)
+        enableEdgeToEdge()
+
+        // Método de Compose que define la interfaz de usuario
+        setContent {
+
+            // Aplica el tema personalizado de la aplicación
+            RompehuevosTheme {
+                // Scaffold: componente estructural que implementa
+                // el diseño básico de Material Design
+                // fillMaxSize() hace que ocupe todo el espacio disponible
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+                    // Usamos Column para centrar el contenido
+                    Column (
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        horizontalAlignment = Alignment.CenterHorizontally, // Centrado horizontal
+                        verticalArrangement = Arrangement.Center // Centrado vertical
+                    ) {
+                        // Llama al composable Greeting
+                        // innerPadding contiene el padding necesario para evitar
+                        // solapamiento con system bars en modo edge-to-edge
+                        Greeting(
+                            name = "Android",
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+// Función componible (UI component) que muestra texto
+// @Composable: anotación que indica que esta función genera UI
+// name: parámetro de entrada (texto a mostrar)
+// modifier: parámetro opcional para personalizar layout y apariencia
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+
+    // Añadimos el estado de taps aquí, integrando la nueva funcionalidad
+    val taps = rememberSaveable { mutableStateOf(0) }
+    val crackGoal = 10
+    val hatchGoal = 20
+
+    // Estado simple para la animación
+    val fontSizeState = remember { mutableStateOf(120f) }
+
+    // Animación del fontSize
+    val animatedFontSize = animateFloatAsState(
+        targetValue = fontSizeState.value,
+        animationSpec = tween(durationMillis = 150),
+        label = "fontSizeAnimation"
+    )
+
+    // Calcular el progreso (entre 0 y 1)
+    val progress = if (hatchGoal > 0) {
+        (taps.value.toFloat() / hatchGoal.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    // Calcular el porcentaje
+    val percentage = (progress * 100).toInt()
+
+    // Determinar qué emoji mostrar basado en el número de taps
+    val eggEmoji = when {
+        taps.value >= hatchGoal -> "🐣" // Pollito saliendo del huevo
+        taps.value >= crackGoal -> "💥🥚" // Huevo roto
+        else -> "🥚" // Huevo normal
+    }
+
+    // Mostrar mensaje de progreso
+    val progressMessage = when {
+        taps.value >= hatchGoal -> "¡Ha nacido!"
+        taps.value >= crackGoal -> "¡Se agrieta!"
+        else -> "Toca..."
+    }
+
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = eggEmoji,
+            fontSize = animatedFontSize.value.sp,
+            modifier = if (taps.value < hatchGoal) {
+             modifier.clickable {
+                   taps.value++
+                   // Animación: cambiar tamaño y volver
+                   fontSizeState.value = 144f // Tamaño grande
+                 // Volver al tamaño normal después de un momento
+                 Handler(Looper.getMainLooper()).postDelayed({
+                     fontSizeState.value = 120f // Tamaño normal
+                 }, 150)
+             }
+            } else {
+                modifier // Sin clickable cuando llegue a 20
+            }
+        )
+
+        Text(
+            text = progressMessage,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        // Texto que muestra el contador de taps
+        Text(
+            text = "Taps: ${taps.value}",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+
+        // Barra de progreso
+        LinearProgressIndicator(
+            progress = progress,
+            modifier = Modifier
+                .width(250.dp) // Ancho de la barra
+                .padding(vertical = 16.dp)
+        )
+
+        // Texto con el porcentaje
+        Text(
+            text = "$percentage%",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "RESET 🗑️",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable{
+
+                taps.value = 0
+            }
+        )
+
+        Text (
+            text = "➕5️⃣",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable{
+                taps.value+=5
+
+            }
+        )
+    }
+}
+
+// Previsualización para Android Studio (no se ejecuta en dispositivo real)
+// @Preview: genera una vista previa en el IDE
+// showBackground = true: muestra fondo para mejor visualización
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    // También actualizamos la preview para que use el mismo diseño
+        RompehuevosTheme {
+            Greeting("Android")
+        }
+    }
