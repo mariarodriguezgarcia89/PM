@@ -1,0 +1,65 @@
+package com.example.ejercicio1_repaso
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import com.example.ejercicio1_repaso.ui.theme.Ejercicio1_RepasoTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            Ejercicio1_RepasoTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+                    // Usamos Column para centrar el contenido
+                    Column (
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        horizontalAlignment = Alignment.CenterHorizontally, // Centrado horizontal
+                        verticalArrangement = Arrangement.Center // Centrado vertical
+                    ) {
+                        // Llama al composable Greeting
+                        // innerPadding contiene el padding necesario para evitar
+                        // solapamiento con system bars en modo edge-to-edge
+                        Greeting(
+                            name = "María",
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hola, me llamo $name!",
+        fontSize = 30.sp,
+        modifier = modifier
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    Ejercicio1_RepasoTheme {
+        Greeting("Android")
+    }
+}
